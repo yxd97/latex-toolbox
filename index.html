@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12695f">
+  <meta name="description" content="在浏览器里编辑论文表格与多联图，即时预览并生成 LaTeX。文件留在本机。">
+  <title>TeX 作坊 · LaTeX 写作工具箱</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="./index.html" aria-label="TeX 作坊首页"><span class="brand-mark">T<span>E</span>X</span><span>TeX 作坊<small>把排版，变成眼前的样子。</small></span></a>
+    <div class="header-actions">
+      <span class="local-badge"><i></i> 纯本地运行</span>
+      <span id="save-status" class="save-status" role="status">正在准备…</span>
+      <div class="history-actions"><button id="undo" class="icon-button" title="撤销" aria-label="撤销" disabled>↶</button><button id="redo" class="icon-button" title="重做" aria-label="重做" disabled>↷</button></div>
+      <button id="import-project" class="secondary">打开项目</button>
+      <button id="save-project" class="primary">保存项目 <span aria-hidden="true">↓</span></button>
+    </div>
+  </header>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-heading">写作工具箱 <span>01</span></div>
+      <nav aria-label="编辑器"><button class="nav-item active" data-editor="table" aria-current="page"><span class="nav-symbol">▦</span>表格编辑器<span class="nav-arrow">↗</span></button><button class="nav-item" data-editor="figure"><span class="nav-symbol">▧</span>图片编辑器<span class="nav-arrow">↗</span></button></nav>
+      <button id="new-project" class="new-project">＋ 新建项目</button>
+      <div class="sidebar-note"><span class="note-symbol">⌘</span><strong>专心写作，其余交给工具。</strong><p>编辑内容与样式，拿走可以继续修改的 LaTeX 代码。</p><div class="privacy-note">无需登录 · 无需上传</div></div>
+      <button id="help-button" class="help-button">? 使用说明与导出约定</button>
+      <div class="sidebar-footer">BROWSER PROTOTYPE <span>v0.1</span></div>
+    </aside>
+    <main class="workspace">
+      <div class="workspace-heading"><div><div class="eyebrow">YOUR PAPER, YOUR WAY</div><h1 id="editor-title">让表格，井然有序。</h1><p id="editor-description">在画布上编辑内容，用熟悉的方式完成论文排版。</p></div><div class="editor-number" aria-hidden="true">01<span> / 02</span></div></div>
+      <div class="project-bar"><div class="project-name-field"><span aria-hidden="true">◈</span><input id="project-name" aria-label="项目名称" maxlength="100" value="未命名项目"><span class="project-dot">·</span><span id="project-kind">TABLE</span></div><button id="import-csv" class="secondary small">↥ 导入 CSV</button></div>
+      <div class="editing-layout"><section class="editor-column" aria-label="可视化编辑区"><div id="editor-host"></div><p class="preview-footnote"><span>◉ 实时布局预览</span> 字体与换行以实际 LaTeX 编译结果为准。</p></section>
+        <aside class="code-panel" aria-label="LaTeX 导出"><div class="code-heading"><div><span class="code-bracket">{ }</span><strong>LaTeX 代码</strong></div><span id="code-kind" class="code-kind">TABLE</span></div><div class="code-tabs" role="tablist" aria-label="代码内容"><button id="tab-code" class="active" role="tab" aria-selected="true">代码片段</button><button id="tab-packages" role="tab" aria-selected="false">所需宏包 <span id="package-count">0</span></button></div><div class="code-content"><pre id="code-pre" tabindex="0"><code id="latex-code"></code></pre><div id="code-empty" hidden>正在生成代码…</div></div><div id="export-warnings" class="export-warnings"></div><div class="code-bottom"><div class="code-info"><span class="code-live-dot"></span>随编辑实时生成<span id="line-count">0 行</span></div><button id="copy-code" class="copy-button">复制 LaTeX <span>⧉</span></button><div class="export-actions"><button id="download-tex" class="secondary">下载 .tex</button><button id="download-zip" class="secondary">代码与原图 .zip</button></div><p>图片仅引用文件名，放入工程后可自行调整路径。</p></div></aside>
+      </div>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <input id="project-file" type="file" accept=".json,application/json" hidden>
+  <input id="csv-file" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values" hidden>
+  <dialog id="csv-dialog"><form method="dialog" class="dialog-content"><div class="dialog-heading"><h2>导入 CSV 表格</h2><button class="icon-button" aria-label="关闭" value="cancel">×</button></div><p class="muted">按解析后的行列创建表格，原有表格内容将被替换；可通过撤销恢复。</p><div class="field-row"><label class="field">分隔符<select id="csv-delimiter"><option value="auto">自动识别</option><option value=",">逗号 (,)</option><option value=";">分号 (;)</option><option value="tab">制表符 (TSV)</option></select></label><label class="checkbox-field"><input type="checkbox" id="csv-header" checked>首行为表头</label></div><div id="csv-summary" class="import-summary"></div><div id="csv-preview" class="csv-preview"></div><p id="csv-error" class="error-message"></p><div class="dialog-actions"><button value="cancel" class="secondary">取消</button><button id="csv-confirm" value="default" class="primary">导入表格</button></div></form></dialog>
+  <dialog id="help-dialog"><div class="dialog-content"><div class="dialog-heading"><h2>从画布到论文</h2><button id="close-help" class="icon-button" aria-label="关闭">×</button></div><div class="help-content"><h3>表格</h3><p>单击选中单元格，Shift + 单击选择矩形区域；双击或直接输入编辑文字。支持从电子表格粘贴多行多列，导入 CSV 后自动匹配维度。工具栏样式作用于所选单元格，切换“标题”后可编辑 caption 样式。</p><h3>多联图</h3><p>按行添加本地图片，每行最多三张。拖动图片或使用移动按钮改变顺序。子图宽度与间隔共同占用一行，修改时会检查预算。caption 可直接在画布上编辑，label 用于交叉引用。</p><h3>导出与编译</h3><p>导出包含完整 table / figure 浮动体；跨双栏使用星号环境。普通文字自动转义，不解析公式。所有布局宽度相对于当前容器的 \linewidth，不生成 \vspace。字体与线条粗细使用 LaTeX 原生单位。</p><p>复制或下载时附带所需宏包。SVG 引用采用 \includesvg，实际编译需要 svg 宏包、Inkscape 和 shell-escape。PDF 图片在此显示占位卡，导出保留原文件。</p><h3>文件与保存</h3><p>所有处理均在浏览器本地进行，无外部字体、CDN 或上传。编辑状态自动保存在当前浏览器；请下载项目 JSON 作为可迁移的备份，它包含图片。ZIP 包含当前元素的代码与原图，图片只以文件名引用。支持现代 Chrome、Edge、Firefox；从文件打开时，存储与剪贴板行为可能因浏览器而异。</p><h3>首版兼容范围</h3><p>代码按标准 article 单栏／双栏文档生成，建议使用 XeLaTeX（中文另需 ctex）或 pdfLaTeX。论文专用模板可能有 caption 或宏包限制，需要在实际工程中验证。预览用于确认内容、布局和样式，不代表 PDF 的精确效果。</p></div></div></dialog>
+  <script src="core.js"></script><script src="table-editor.js"></script><script src="figure-editor.js"></script><script src="app.js"></script>
+</body>
+</html>
